@@ -65,7 +65,7 @@ ESP32-S3 → Status LEDs
 
 ## Design Tools
 
-* KiCad 9
+* KiCad 10
 * GitHub
 
 ---
