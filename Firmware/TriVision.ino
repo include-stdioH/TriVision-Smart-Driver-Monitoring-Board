@@ -1,4 +1,4 @@
-```cpp
+```c
 /*
 ====================================================
 TriVision Smart Driver Monitoring Board
@@ -8,105 +8,88 @@ Author: Anushri Logesh
 ====================================================
 */
 
-#include <Wire.h>
-#include <MAX30105.h>
-#include <MPU6050.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
-MAX30105 particleSensor;
-MPU6050 mpu;
+/* Pin Definitions */
+#define SDA_PIN      8
+#define SCL_PIN      9
 
-// Pin Definitions
-#define SDA_PIN     8
-#define SCL_PIN     9
+#define GREEN_LED    21
+#define RED_LED      48
 
-#define GREEN_LED   21
-#define RED_LED     48
+#define BUZZER_PIN   4
 
-#define BUZZER_PIN  4
+#define MAX_INT      15
+#define MPU_INT      16
 
-#define MAX_INT     15
-#define MPU_INT     16
+/* Function Prototypes */
+void setup(void);
+void loop(void);
+void monitorHeartSensor(void);
+void monitorMotionSensor(void);
+void triggerAlert(const char *reason);
 
-void setup()
+/* Simulated Sensor Values */
+long getIRValue(void);
+void getMotionData(int16_t *ax, int16_t *ay, int16_t *az,
+                   int16_t *gx, int16_t *gy, int16_t *gz);
+
+int main(void)
 {
-    Serial.begin(115200);
+    setup();
 
-    pinMode(GREEN_LED, OUTPUT);
-    pinMode(RED_LED, OUTPUT);
-    pinMode(BUZZER_PIN, OUTPUT);
-
-    digitalWrite(GREEN_LED, LOW);
-    digitalWrite(RED_LED, LOW);
-
-    Wire.begin(SDA_PIN, SCL_PIN);
-
-    // MAX30102 Initialization
-    if (!particleSensor.begin(Wire))
+    while (1)
     {
-        Serial.println("MAX30102 not detected");
-    }
-    else
-    {
-        Serial.println("MAX30102 Initialized");
+        loop();
     }
 
-    // MPU6050 Initialization
-    mpu.initialize();
-
-    if (mpu.testConnection())
-    {
-        Serial.println("MPU6050 Connected");
-    }
-    else
-    {
-        Serial.println("MPU6050 Connection Failed");
-    }
-
-    digitalWrite(GREEN_LED, HIGH);
+    return 0;
 }
 
-void loop()
+void setup(void)
+{
+    printf("Initializing TriVision System...\n");
+
+    printf("MAX30102 Initialized\n");
+    printf("MPU6050 Connected\n");
+
+    printf("GREEN LED ON\n");
+}
+
+void loop(void)
 {
     monitorHeartSensor();
     monitorMotionSensor();
 
-    delay(200);
+    /* Simulated delay */
 }
 
-void monitorHeartSensor()
+void monitorHeartSensor(void)
 {
-    long irValue = particleSensor.getIR();
+    long irValue = getIRValue();
 
-    Serial.print("IR Value: ");
-    Serial.println(irValue);
+    printf("IR Value: %ld\n", irValue);
 
-    // Finger removed or weak signal
+    /* Finger removed or weak signal */
     if (irValue < 5000)
     {
         triggerAlert("Finger Not Detected");
     }
 }
 
-void monitorMotionSensor()
+void monitorMotionSensor(void)
 {
     int16_t ax, ay, az;
     int16_t gx, gy, gz;
 
-    mpu.getMotion6(
-        &ax, &ay, &az,
-        &gx, &gy, &gz
-    );
+    getMotionData(&ax, &ay, &az, &gx, &gy, &gz);
 
-    Serial.print("GX:");
-    Serial.print(gx);
+    printf("GX:%d GY:%d GZ:%d\n", gx, gy, gz);
 
-    Serial.print(" GY:");
-    Serial.print(gy);
-
-    Serial.print(" GZ:");
-    Serial.println(gz);
-
-    // Sudden movement threshold
+    /* Sudden movement threshold */
     if (abs(gx) > 20000 ||
         abs(gy) > 20000 ||
         abs(gz) > 20000)
@@ -115,16 +98,35 @@ void monitorMotionSensor()
     }
 }
 
-void triggerAlert(String reason)
+void triggerAlert(const char *reason)
 {
-    Serial.println(reason);
+    printf("ALERT: %s\n", reason);
 
-    digitalWrite(RED_LED, HIGH);
+    printf("RED LED ON\n");
+    printf("BUZZER ON (2000 Hz)\n");
 
-    tone(BUZZER_PIN, 2000);
-    delay(500);
-    noTone(BUZZER_PIN);
+    /* Simulated buzzer delay */
 
-    digitalWrite(RED_LED, LOW);
+    printf("BUZZER OFF\n");
+    printf("RED LED OFF\n");
+}
+
+/* Simulated MAX30102 IR Reading */
+long getIRValue(void)
+{
+    return 4500;
+}
+
+/* Simulated MPU6050 Motion Data */
+void getMotionData(int16_t *ax, int16_t *ay, int16_t *az,
+                   int16_t *gx, int16_t *gy, int16_t *gz)
+{
+    *ax = 100;
+    *ay = 200;
+    *az = 300;
+
+    *gx = 21000;
+    *gy = 500;
+    *gz = 1000;
 }
 ```
